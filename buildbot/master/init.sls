@@ -11,7 +11,7 @@ buildbot-master:
       - txgithub == 15.0.0
       - boto == 2.38.0
       - pyyaml == 3.11
-      - twisted == 16.6.0
+      - twisted == 16.6.0  # NOTE: keep in sync with buildbot-slave sls
     - require:
       - pkg: pip
   service.running:
@@ -19,6 +19,7 @@ buildbot-master:
     # Buildbot must be restarted manually! See 'Buildbot administration' on the
     # wiki and https://github.com/servo/saltfs/issues/304.
     - require:
+      - user: servo
       - pip: buildbot-master
       - file: {{ common.servo_home }}/buildbot/master
       - file: /etc/init/buildbot-master.conf
@@ -34,6 +35,8 @@ buildbot-master:
     - context:
         common: {{ common }}
         buildbot_credentials: {{ pillar['buildbot']['credentials'] }}
+    - require:
+      - user: servo
 
 ownership-{{ common.servo_home }}/buildbot/master:
   file.directory:
@@ -43,6 +46,8 @@ ownership-{{ common.servo_home }}/buildbot/master:
     - recurse:
       - user
       - group
+    - require:
+      - file: {{ common.servo_home }}/buildbot/master
 
 /etc/init/buildbot-master.conf:
   file.managed:
